@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burtonian Brewery – Visit Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --emerald:#49B190;--emerald-link:#53AC90;--emerald-dark:#457865;--emerald-soft:#72B1A0;
+  --text-strong:#323232;--text:#777777;--bg:#FFFFFF;--bg-soft:#F9F9F9;--line:#DADADA;--line-strong:#BBBBBB;
+  --bad:#c9524a;--font-head:'Montserrat',sans-serif;--font-body:'Open Sans',sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.7}
+header.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header.top img{height:60px;width:auto;display:block}
+header.top .tag{font-family:var(--font-head);font-weight:300;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;color:var(--emerald-dark)}
+.hero{background:linear-gradient(135deg,var(--emerald-dark),var(--emerald));color:#fff;text-align:center;padding:48px 20px 40px}
+.hero h1{font-family:var(--font-head);font-weight:700;text-transform:uppercase;font-size:clamp(1.6rem,5vw,3rem);margin:0 0 8px;text-shadow:0 1px 4px rgba(0,0,0,.25);line-height:1.2}
+.hero p{margin:0 auto;max-width:640px;font-size:1.05rem;opacity:.95}
+nav.tabs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+nav.tabs button{font:600 .95rem var(--font-body);color:var(--text);background:none;border:0;border-bottom:2px solid transparent;padding:14px 18px;cursor:pointer}
+nav.tabs button[aria-selected=true]{color:var(--emerald-link);border-bottom-color:var(--emerald)}
+nav.tabs .done::after{content:" ✓";color:var(--emerald)}
+main{max-width:1080px;margin:0 auto;padding:0 16px 60px}
+section.panel{display:none}section.panel.active{display:block}
+h2{font-family:var(--font-head);font-weight:300;text-transform:uppercase;color:var(--emerald-dark);text-align:center;font-size:clamp(1.6rem,4vw,2.6rem);margin:44px 0 10px;line-height:1.3}
+.lead{text-align:center;max-width:720px;margin:0 auto 24px}
+.btn{font:600 .95rem var(--font-body);background:var(--emerald);color:#fff;border:2px solid var(--emerald);border-radius:4px;padding:10px 22px;cursor:pointer}
+.btn:hover{background:#3f9c7e;border-color:#3f9c7e}
+.btn.ghost{background:#fff;color:var(--emerald-dark)}
+.btn.ghost:hover{background:var(--bg-soft);border-color:var(--emerald)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px 0}
+.msg{text-align:center;font-family:var(--font-head);font-weight:700;color:var(--emerald-dark);min-height:1.6em;margin:6px 0}
+
+/* brewing */
+.bank{position:sticky;top:52px;z-index:15;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:4px;padding:10px;margin:0 0 54px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:56px;align-items:center}
+.bank.over{outline:2px dashed var(--emerald)}
+.bank .empty{font-size:.85rem}
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;font:700 .85rem var(--font-head);text-transform:uppercase;letter-spacing:.04em;color:#fff;background:var(--emerald);border:0;border-radius:4px;padding:9px 14px;cursor:grab}
+.chip.sel{outline:3px solid var(--emerald-dark);outline-offset:1px}
+.chip.ghost{position:fixed;z-index:1000;pointer-events:none;opacity:.9;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:64px 20px}
+.card{background:var(--bg-soft);border-radius:4px;padding:0 14px 18px;text-align:center;position:relative}
+.card .pic{width:112px;height:112px;border-radius:50%;background:var(--emerald);margin:-46px auto 10px;border:4px solid #fff;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.card .pic svg{width:100%;height:100%;display:block}
+.card .n{font:400 .75rem var(--font-head);letter-spacing:.14em;text-transform:uppercase;color:var(--emerald-soft)}
+.slot{min-height:46px;margin:6px 0 10px;border:2px dashed var(--line-strong);border-radius:4px;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--line-strong);font-size:.8rem;cursor:pointer;padding:3px}
+.slot.over{border-color:var(--emerald);background:#eef8f4}
+.slot.filled{border-style:solid;border-color:var(--emerald)}
+.slot.ok{border-color:var(--emerald);background:#e6f5ef}
+.slot.ok .chip{background:var(--emerald-dark)}
+.slot.bad{border-color:var(--bad);background:#fbeeec;animation:shake .35s}
+.slot.bad .chip{background:var(--bad)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.card p{margin:0;font-size:.9rem;line-height:1.7}
+.card .img-cap{display:block;font-size:.7rem;color:var(--emerald-soft);margin-top:6px}
+
+/* crossword */
+.cw-wrap{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.cw-grid{display:grid;gap:2px;--cs:clamp(22px,5.4vw,38px);flex:0 0 auto}
+.cw-cell{width:var(--cs);height:var(--cs);position:relative;background:#fff;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font:700 calc(var(--cs)*.5) var(--font-head);color:var(--text-strong);cursor:pointer;text-transform:uppercase}
+.cw-cell.blank{visibility:hidden}
+.cw-cell .num{position:absolute;top:1px;left:2px;font:400 calc(var(--cs)*.28) var(--font-body);color:var(--emerald-dark)}
+.cw-cell.word{background:#e6f5ef}
+.cw-cell.cur{background:var(--emerald);color:#fff}.cw-cell.cur .num{color:#fff}
+.cw-cell.bad{color:var(--bad)}.cw-cell.good{color:var(--emerald-dark)}
+.cw-clues{flex:1 1 280px;max-width:440px}
+.cw-clues h3{font:700 .9rem var(--font-head);text-transform:uppercase;letter-spacing:.08em;color:var(--emerald-dark);margin:0 0 6px}
+.cw-clues ol{list-style:none;margin:0 0 18px;padding:0}
+.cw-clues li{padding:5px 8px;border-radius:4px;cursor:pointer;font-size:.92rem;line-height:1.45}
+.cw-clues li b{color:var(--emerald-dark);margin-right:6px}
+.cw-clues li.act{background:#e6f5ef;color:var(--text-strong)}
+.cw-clues li.solved{text-decoration:line-through;opacity:.55}
+.cw-now{background:var(--bg-soft);border-radius:4px;padding:10px 14px;margin:0 auto 16px;max-width:520px;text-align:center;color:var(--text-strong);font-size:.95rem}
+#cwIn{position:fixed;left:-200px;top:0;width:10px;opacity:0}
+
+/* quiz */
+.qbox{background:var(--bg-soft);border-radius:4px;padding:26px 22px;max-width:720px;margin:0 auto}
+.qmeta{display:flex;justify-content:space-between;font:400 .75rem var(--font-head);letter-spacing:.12em;text-transform:uppercase;color:var(--emerald-soft);margin-bottom:8px}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-bottom:18px}.bar i{display:block;height:100%;background:var(--emerald);border-radius:2px;transition:width .3s}
+.qtext{font:700 1.15rem var(--font-head);color:var(--text-strong);margin:0 0 16px;line-height:1.5}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;font:400 1rem var(--font-body);color:var(--text-strong);background:#fff;border:2px solid var(--line);border-radius:4px;padding:11px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--emerald)}
+.opt.right{border-color:var(--emerald);background:#e6f5ef}
+.opt.wrong{border-color:var(--bad);background:#fbeeec}
+.explain{margin:14px 0 0;font-size:.92rem;min-height:1.4em}
+.score{font:300 3rem var(--font-head);color:var(--emerald-dark);text-align:center;margin:4px 0}
+.beers{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:56px 16px;margin-top:64px}
+.beer{background:#fff;border-radius:4px;padding:0 14px 16px;text-align:left;position:relative;font-size:.88rem;line-height:1.55}
+.beer .dot{width:64px;height:64px;border-radius:50%;margin:-32px auto 8px;border:4px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.beer h4{font:700 1rem var(--font-head);color:var(--text-strong);text-align:center;margin:0 0 6px}
+.beer b{color:var(--emerald-dark)}
+.bitter{display:inline-block;letter-spacing:2px;color:var(--emerald)}
+footer{border-top:1px solid var(--line);text-align:center;padding:22px 16px;font-size:.78rem}
+footer img{height:38px;width:auto;margin-bottom:6px}
+@media(max-width:600px){header.top img{height:46px}header.top .tag{display:none}nav.tabs button{padding:12px 10px;font-size:.85rem}}
+</style>
+</head>
+<body>
+<header class="top">
+  <img src="data:image/png;base64,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" width="306" height="90" alt="Emerald Language Learning">
+  <span class="tag">After the visit</span>
+</header>
+<div class="hero">
+  <h1>Burtonian Brewery quiz</h1>
+  <p>English-style craft beer, brewed in Castres. How much did you remember from today's visit?</p>
+</div>
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="brew">1 · Brewing steps</button>
+  <button role="tab" aria-selected="false" data-tab="cw">2 · Crossword</button>
+  <button role="tab" aria-selected="false" data-tab="beers">3 · The beers</button>
+</nav>
+<main>
+
+<section class="panel active" id="brew">
+  <h2>From grain to glass</h2>
+  <p class="lead">Put the eight steps of brewing in the right place. <b>Drag</b> a term onto the picture it matches, or <b>tap</b> a term and then tap an empty box.</p>
+  <div class="bank" id="bank" aria-label="Terms to place"></div>
+  <div class="steps" id="steps"></div>
+  <div class="actions">
+    <button class="btn" id="brewCheck">Check my answers</button>
+    <button class="btn ghost" id="brewReset">Start again</button>
+  </div>
+  <div class="msg" id="brewMsg"></div>
+</section>
+
+<section class="panel" id="cw">
+  <h2>Brewing crossword</h2>
+  <p class="lead">Tap a square and type. Tap it again to switch between across and down, or choose a clue from the list.</p>
+  <div class="cw-now" id="cwNow">Choose a square to start.</div>
+  <div class="cw-wrap">
+    <div class="cw-grid" id="cwGrid"></div>
+    <div class="cw-clues"><h3>Across</h3><ol id="clA"></ol><h3>Down</h3><ol id="clD"></ol></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="cwCheck">Check</button>
+    <button class="btn ghost" id="cwHint">Reveal this word</button>
+    <button class="btn ghost" id="cwClear">Clear all</button>
+  </div>
+  <div class="msg" id="cwMsg"></div>
+  <input id="cwIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="Crossword letter input">
+</section>
+
+<section class="panel" id="beers">
+  <h2>Know your beers</h2>
+  <div id="quiz"></div>
+</section>
+
+</main>
+<footer>
+  <img src="data:image/png;base64,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" width="306" height="90" alt="Emerald Language Learning"><br>
+  Quiz content based on burtonian.fr and today's brewery visit. Illustrations are original drawings.
+</footer>
+
+<script>
+/* ======================= DATA – edit here ======================= */
+const STEPS=[
+ {t:"Milling",   d:"The malted barley is crushed between rollers. This cracks the husk and exposes the starch inside the grain."},
+ {t:"Mashing",   d:"The crushed grain is soaked in hot water at about 65–68 °C. Enzymes turn the starch into sugar."},
+ {t:"Lautering", d:"The sweet liquid, called wort, is drained off. The spent grain is rinsed and stays behind."},
+ {t:"Boiling",   d:"The wort is brought to a rolling boil and the hops are added for bitterness and aroma."},
+ {t:"Cooling",   d:"The hot wort is chilled quickly through a heat exchanger, down to about 20 °C."},
+ {t:"Fermentation", d:"Yeast is added. It eats the sugar and produces alcohol and carbon dioxide."},
+ {t:"Conditioning", d:"The young beer rests for days or weeks. The flavours mellow and the beer becomes clear."},
+ {t:"Packaging", d:"The finished beer is filled into bottles, casks or kegs, ready to be sold."}
+];
+/* Beers: from burtonian.fr. The site gives a bitterness rating out of 5, not IBU.
+   If the brewer gives you IBU figures during the visit, type them in ("ibu") and an IBU question appears. */
+const BEERS=[
+ {n:"Summer Ale",abv:3.5,bit:1,ibu:null,hops:"Fuggles and Cascade",col:"pale yellow",aroma:"floral",note:"delicate hop bitterness, a discreet sparkle, refreshing finish",c:"#F1E08A"},
+ {n:"English Porter",abv:5.5,bit:2,ibu:null,hops:"Northdown and Challenger",col:"deep, dark",aroma:"liquorice, dark chocolate and coffee",note:"clean roasted notes, silky body, slight sweetness",c:"#3b2a22"},
+ {n:"Best Bitter",abv:5,bit:3,ibu:null,hops:"Northdown and Challenger",col:"amber",aroma:"subtle and precise",note:"balance of hop bitterness and malt roundness",c:"#C98A2B"},
+ {n:"Amber Brew",abv:6.5,bit:2,ibu:null,hops:"East Kent Goldings",col:"amber",aroma:"honey and spice",note:"caramel and biscuit flavours, full dense body; do not serve it too cold",c:"#B8651B"},
+ {n:"English IPA",abv:5.5,bit:4,ibu:null,hops:"Endeavour and Bramling Cross",col:"lightly amber",aroma:"fruity",note:"pronounced hop character balanced by fruity notes",c:"#D9A441"}
+];
+const BEER_NAMES=BEERS.map(b=>b.n);
+const QS=[
+ {q:"Which Burtonian beer has the LOWEST alcohol content (3.5%)?",a:"Summer Ale",o:BEER_NAMES,e:"Summer Ale is the lightest at 3.5% ABV."},
+ {q:"Which beer has the HIGHEST alcohol content (6.5%)?",a:"Amber Brew",o:BEER_NAMES,e:"Amber Brew reaches 6.5% ABV."},
+ {q:"What is the alcohol content of the English Porter?",a:"5.5%",o:["3.5%","5%","5.5%","6.5%"],e:"The English Porter and the English IPA are both 5.5%."},
+ {q:"Which beer smells of liquorice, dark chocolate and coffee?",a:"English Porter",o:BEER_NAMES,e:"Roasted malts give the Porter its dark, coffee-like aromas."},
+ {q:"Which beer has honey and spice aromas?",a:"Amber Brew",o:BEER_NAMES,e:"Honey and spice, then caramel and biscuit flavours."},
+ {q:"Which beer has floral aromas and a pale yellow colour?",a:"Summer Ale",o:BEER_NAMES,e:"The Summer Ale is pale, floral and refreshing."},
+ {q:"Which beer is the MOST bitter (4 out of 5)?",a:"English IPA",o:BEER_NAMES,e:"IPAs are strongly hopped, so they are the most bitter."},
+ {q:"Which beer is the LEAST bitter (1 out of 5)?",a:"Summer Ale",o:BEER_NAMES,e:"Delicate hop bitterness, rated 1/5."},
+ {q:"Which hops are used in the Summer Ale?",a:"Fuggles and Cascade",o:["Fuggles and Cascade","Northdown and Challenger","East Kent Goldings","Endeavour and Bramling Cross"],e:"Fuggles and Cascade, both English-style hops."},
+ {q:"Which hops are used in the English IPA?",a:"Endeavour and Bramling Cross",o:["Fuggles and Cascade","Northdown and Challenger","East Kent Goldings","Endeavour and Bramling Cross"],e:"Endeavour and Bramling Cross."},
+ {q:"Which hop variety gives the Amber Brew its character?",a:"East Kent Goldings",o:["Fuggles and Cascade","Northdown and Challenger","East Kent Goldings","Endeavour and Bramling Cross"],e:"East Kent Goldings is a classic English hop."},
+ {q:"Which TWO beers share the same hops, Northdown and Challenger?",a:"Best Bitter and English Porter",o:["Best Bitter and English Porter","Summer Ale and Amber Brew","English IPA and Summer Ale","Amber Brew and English Porter"],e:"Same hops, very different beers: the malts change everything."},
+ {q:"Which beer should NOT be served too cold?",a:"Amber Brew",o:BEER_NAMES,e:"Serving it a little warmer lets the honey and caramel aromas come out."},
+ {q:"What colour is the Best Bitter?",a:"Amber",o:["Pale yellow","Amber","Deep, dark","Golden brown"],e:"Amber, with a balance of hops and malt."},
+ {q:"Why did brewers in Burton-on-Trent add more hops and alcohol to the first IPAs?",a:"So the beer would survive the voyage to India",o:["To make it cheaper","So the beer would survive the voyage to India","To make it darker","Because the water was hard"],e:"Over 200 years ago, hops and alcohol helped preserve the beer on the long sea journey."},
+ {q:"Where is Burtonian brewery based?",a:"Castres, near Toulouse",o:["Burton-on-Trent","Castres, near Toulouse","Bordeaux","Gaillac"],e:"Castres, in Occitanie. The local water suits English-style beer."}
+];
+if(BEERS.every(b=>b.ibu!=null)){
+  const sorted=[...BEERS].sort((x,y)=>y.ibu-x.ibu);
+  QS.push({q:"Which beer has the highest IBU (bitterness units)?",a:sorted[0].n,o:BEER_NAMES,e:sorted[0].n+" has "+sorted[0].ibu+" IBU."});
+}
+const CW={"rows":15,"cols":15,"words":[{"a":"CARAMEL","q":"Sweet, toasted flavour in Amber Brew","r":10,"c":2,"d":"A"},{"a":"FILTER","q":"Separate the liquid wort from the spent grain","r":5,"c":4,"d":"D"},{"a":"BITTER","q":"Amber English beer balancing hops and malt","r":6,"c":3,"d":"A"},{"a":"PORTER","q":"Dark beer with chocolate and coffee notes","r":2,"c":7,"d":"D"},{"a":"BARLEY","q":"Cereal grain that is malted to make beer","r":4,"c":5,"d":"A"},{"a":"COFFEE","q":"Roasted flavour in the English Porter","r":0,"c":9,"d":"D"},{"a":"BOTTLE","q":"Glass container for packaged beer","r":8,"c":1,"d":"A"},{"a":"FLORAL","q":"Aroma of flowers, found in the Summer Ale","r":2,"c":9,"d":"A"},{"a":"GRAIN","q":"Seed of barley, wheat or rye","r":0,"c":13,"d":"D"},{"a":"YEAST","q":"Micro-organism that turns sugar into alcohol","r":9,"c":7,"d":"D"},{"a":"SPICE","q":"Aroma found in Amber Brew, with honey","r":12,"c":7,"d":"A"},{"a":"AROMA","q":"The smell of a beer","r":10,"c":3,"d":"D"},{"a":"AMBER","q":"Colour between gold and brown","r":10,"c":5,"d":"D"},{"a":"MILL","q":"Crush the malted barley in a ___","r":11,"c":9,"d":"D"},{"a":"BREW","q":"To make beer","r":10,"c":11,"d":"D"},{"a":"COOL","q":"The wort must be ___ before the yeast is added","r":0,"c":11,"d":"D"},{"a":"BODY","q":"How full or thin a beer feels in the mouth","r":10,"c":11,"d":"A"},{"a":"WORT","q":"Sweet liquid made by mashing, before fermentation","r":13,"c":11,"d":"A"},{"a":"FOAM","q":"White head on top of a poured beer","r":13,"c":0,"d":"A"},{"a":"ALE","q":"Beer fermented with top-fermenting yeast","r":14,"c":8,"d":"A"}]};
+
+/* ======================= helpers ======================= */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const mark=id=>document.querySelector('[data-tab="'+id+'"]').classList.add('done');
+
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('section.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.tab));
+  window.scrollTo({top:0});
+});
+
+/* ======================= illustrations (original SVG) ======================= */
+const G='#49B190',D='#457865',AM='#D9962B',W='#E8C77A',SKY='#EAF5F1',GR='#9aa5a1';
+const wrap=s=>`<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><rect width="240" height="240" fill="${SKY}"/>${s}</svg>`;
+const hop=(x,y,r=0)=>`<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 0q16 6 16 22q-16 18-32 0q0-16 16-22z" fill="${G}" stroke="${D}" stroke-width="2.5"/><path d="M-9 8q9 4 18 0M-11 16q11 5 22 0" stroke="${D}" stroke-width="2" fill="none"/></g>`;
+const ART=[
+/*1 mill*/ wrap(`<path d="M70 26h100l-26 44h-48z" fill="#d5e0dc" stroke="${D}" stroke-width="4"/>
+ ${[[104,40],[124,48],[142,38],[116,58],[134,60],[96,52]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="6" ry="3.5" fill="${W}" stroke="${D}" stroke-width="1.5" transform="rotate(${p[0]%40} ${p[0]} ${p[1]})"/>`).join('')}
+ <circle cx="104" cy="104" r="26" fill="#fff" stroke="${D}" stroke-width="4"/><circle cx="104" cy="104" r="7" fill="${D}"/>
+ <circle cx="140" cy="104" r="26" fill="#fff" stroke="${D}" stroke-width="4"/><circle cx="140" cy="104" r="7" fill="${D}"/>
+ <path d="M122 134v18M112 134l-4 14M132 134l4 14" stroke="${W}" stroke-width="4" stroke-linecap="round"/>
+ <path d="M64 206q58-60 116 0z" fill="${W}" stroke="${D}" stroke-width="4"/>
+ ${[[100,190],[124,184],[146,194],[116,200],[86,200]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#b88a3a"/>`).join('')}`),
+/*2 mash*/ wrap(`<path d="M52 92h136v82q0 34-34 34h-68q-34 0-34-34z" fill="#fff" stroke="${D}" stroke-width="4"/>
+ <path d="M60 106h120v68q0 26-26 26h-68q-26 0-26-26z" fill="${AM}" opacity=".75"/>
+ ${[[84,130],[110,150],[140,126],[158,160],[100,176],[128,184],[76,164]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="6" ry="3.5" fill="${W}" stroke="#a97c2c" stroke-width="1.2"/>`).join('')}
+ <path d="M168 24L128 150" stroke="${D}" stroke-width="7" stroke-linecap="round"/><rect x="108" y="140" width="40" height="12" rx="5" fill="${D}" transform="rotate(-18 128 146)"/>
+ <path d="M84 78q-10-10 0-20t0-20M112 78q-10-10 0-20t0-20" stroke="${GR}" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <rect x="200" y="50" width="14" height="96" rx="7" fill="#fff" stroke="${D}" stroke-width="3"/><rect x="204" y="86" width="6" height="60" fill="#d9534f"/><circle cx="207" cy="152" r="12" fill="#d9534f" stroke="${D}" stroke-width="3"/>`),
+/*3 lauter*/ wrap(`<path d="M26 64h108v86q0 14-14 14h-80q-14 0-14-14z" fill="#fff" stroke="${D}" stroke-width="4"/>
+ <path d="M32 84h96v66q0 8-8 8h-80q-8 0-8-8z" fill="${AM}" opacity=".75"/><path d="M32 128h96v22q0 8-8 8h-80q-8 0-8-8z" fill="${W}" stroke="#a97c2c" stroke-width="2"/>
+ <path d="M40 36h80M60 36v14M80 36v14M100 36v14" stroke="${D}" stroke-width="4" stroke-linecap="round"/>
+ ${[[60,58],[80,60],[100,58]].map(p=>`<path d="M${p[0]} ${p[1]}q-4 6 0 8q4-2 0-8z" fill="#5aa7d6"/>`).join('')}
+ <rect x="134" y="140" width="26" height="12" rx="3" fill="${D}"/><path d="M160 146h28v52" stroke="${AM}" stroke-width="7" fill="none"/>
+ <path d="M150 196h80v18q0 12-12 12h-56q-12 0-12-12z" fill="#fff" stroke="${D}" stroke-width="4"/><path d="M158 206h64v8q0 6-6 6h-52q-6 0-6-6z" fill="${AM}" opacity=".85"/>`),
+/*4 boil*/ wrap(`<path d="M52 88h136v84q0 20-20 20h-96q-20 0-20-20z" fill="#fff" stroke="${D}" stroke-width="4"/><ellipse cx="120" cy="88" rx="68" ry="12" fill="${AM}" stroke="${D}" stroke-width="4"/>
+ <circle cx="42" cy="110" r="9" fill="none" stroke="${D}" stroke-width="4"/><circle cx="198" cy="110" r="9" fill="none" stroke="${D}" stroke-width="4"/>
+ ${[[92,84,5],[126,92,7],[152,82,4],[110,80,3]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="${p[2]}" fill="#fff6dd" stroke="${AM}" stroke-width="2"/>`).join('')}
+ ${hop(96,14,-12)}${hop(138,26,10)}${hop(168,6,-6)}
+ <path d="M76 200q8-18 16 0q8-24 16 0q8-30 16 0q8-24 16 0q8-18 16 0q-2 22-14 22h-52q-12 0-14-22z" fill="#f08a24" stroke="#c9531c" stroke-width="3"/>`),
+/*5 cool*/ wrap(`<rect x="82" y="56" width="76" height="128" rx="6" fill="#fff" stroke="${D}" stroke-width="4"/>
+ ${[102,114,126,138].map(x=>`<path d="M${x} 62v116" stroke="${G}" stroke-width="4"/>`).join('')}
+ <path d="M14 84h66" stroke="#d9534f" stroke-width="9"/><path d="M68 70l16 14l-16 14z" fill="#d9534f"/>
+ <path d="M160 156h66" stroke="#4a90c8" stroke-width="9"/><path d="M214 142l16 14l-16 14z" fill="#4a90c8"/>
+ <text x="14" y="70" font-family="Montserrat,sans-serif" font-weight="700" font-size="20" fill="#d9534f">95°C</text>
+ <text x="170" y="192" font-family="Montserrat,sans-serif" font-weight="700" font-size="20" fill="#4a90c8">20°C</text>
+ <path d="M160 70h40" stroke="#4a90c8" stroke-width="5" stroke-dasharray="2 8" stroke-linecap="round"/><path d="M40 170h40" stroke="#4a90c8" stroke-width="5" stroke-dasharray="2 8" stroke-linecap="round"/>`),
+/*6 ferment*/ wrap(`<path d="M72 56q48-26 96 0v84H72z" fill="#fff" stroke="${D}" stroke-width="4"/><path d="M72 140L120 206L168 140z" fill="#fff" stroke="${D}" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M78 96h84v44l-42 58l-42-58z" fill="${AM}" opacity=".8"/><path d="M78 86q10-12 21 0q10-12 21 0q10-12 21 0q10-12 21 0v12H78z" fill="#fff"/>
+ ${[[100,120],[126,112],[116,146],[140,132],[108,170]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#fff6dd" opacity=".9"/>`).join('')}
+ ${[[96,132],[134,150],[120,124]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#8a5a1d"/>`).join('')}
+ <path d="M120 34V14h24" stroke="${D}" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="150" cy="14" r="5" fill="#fff" stroke="${D}" stroke-width="2.5"/><circle cx="164" cy="8" r="4" fill="#fff" stroke="${D}" stroke-width="2.5"/>
+ <text x="168" y="40" font-family="Montserrat,sans-serif" font-weight="700" font-size="16" fill="${D}">CO₂</text>
+ <path d="M84 150l-14 56M156 150l14 56" stroke="${D}" stroke-width="5" stroke-linecap="round"/>`),
+/*7 condition*/ wrap(`<rect x="28" y="88" width="184" height="80" rx="40" fill="#fff" stroke="${D}" stroke-width="4"/>
+ <rect x="48" y="104" width="144" height="48" rx="24" fill="${AM}" opacity=".35"/><path d="M66 116h30M150 140h28" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+ <path d="M64 168l-10 38M176 168l10 38" stroke="${D}" stroke-width="6" stroke-linecap="round"/>
+ <circle cx="178" cy="46" r="30" fill="#fff" stroke="${D}" stroke-width="4"/><path d="M178 46V26M178 46l14 8" stroke="${D}" stroke-width="5" stroke-linecap="round"/><circle cx="178" cy="46" r="3.5" fill="${D}"/>
+ <text x="36" y="62" font-family="Montserrat,sans-serif" font-weight="700" font-size="30" fill="${D}">z</text><text x="58" y="50" font-family="Montserrat,sans-serif" font-weight="700" font-size="22" fill="${D}">z</text><text x="76" y="40" font-family="Montserrat,sans-serif" font-weight="700" font-size="16" fill="${D}">z</text>`),
+/*8 package*/ wrap(`${[34,78].map(x=>`<g transform="translate(${x} 0)"><rect x="12" y="62" width="14" height="14" fill="#7b5a1f"/><path d="M12 76q-8 20-8 34v90q0 8 8 8h34q8 0 8-8v-90q0-14-8-34z" fill="${AM}" stroke="${D}" stroke-width="4" transform="translate(-2 0) scale(.95 1)"/><rect x="6" y="136" width="36" height="34" rx="3" fill="#fff6dd" stroke="${D}" stroke-width="2.5"/><path d="M12 150h24M12 158h16" stroke="${AM}" stroke-width="3"/></g>`).join('')}
+ <rect x="142" y="84" width="72" height="116" rx="14" fill="#cfd9d6" stroke="${D}" stroke-width="4"/><path d="M142 106h72M142 178h72" stroke="${D}" stroke-width="4"/><rect x="164" y="64" width="28" height="22" rx="4" fill="#b7c4c0" stroke="${D}" stroke-width="4"/><circle cx="178" cy="142" r="14" fill="#fff" stroke="${D}" stroke-width="3"/><path d="M172 142h12M178 136v12" stroke="${G}" stroke-width="3"/>`)
+];
+
+/* ======================= 1. brewing steps ======================= */
+let bank,placed,status,selected=null;
+function brewInit(){
+  bank=shuffle(STEPS.map(s=>s.t));placed=STEPS.map(()=>null);status=STEPS.map(()=>null);selected=null;
+  $('#brewMsg').textContent='';brewRender();
+}
+function chip(t,cls=''){return `<button class="chip ${cls}${selected===t?' sel':''}" data-t="${t}" type="button">${t}</button>`}
+function brewRender(){
+  $('#bank').innerHTML=bank.length?bank.map(t=>chip(t)).join(''):'<span class="empty">All terms are placed — press “Check my answers”.</span>';
+  $('#steps').innerHTML=STEPS.map((s,i)=>`
+   <div class="card"><div class="pic">${ART[i]}</div>
+    <div class="n">Step ${i+1}</div>
+    <div class="slot ${placed[i]?'filled':''} ${status[i]||''}" data-slot="${i}" aria-label="Slot for step ${i+1}">${placed[i]?chip(placed[i]):'drop term here'}</div>
+    <p>${s.d}</p></div>`).join('');
+}
+function removeTerm(t){const b=bank.indexOf(t);if(b>-1)bank.splice(b,1);const p=placed.indexOf(t);if(p>-1){placed[p]=null;status[p]=null}}
+function putSlot(t,i){
+  const occ=placed[i];removeTerm(t);
+  if(occ&&occ!==t)bank.push(occ);
+  placed[i]=t;status[i]=null;selected=null;brewRender();
+}
+function putBank(t){removeTerm(t);bank.push(t);selected=null;brewRender()}
+let drag=null;
+document.addEventListener('pointerdown',e=>{
+  const c=e.target.closest('#brew .chip');if(!c)return;
+  drag={t:c.dataset.t,x:e.clientX,y:e.clientY,el:c,ghost:null,moved:false};
+  c.setPointerCapture&&c.setPointerCapture(e.pointerId);
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>8){
+    drag.moved=true;const g=drag.el.cloneNode(true);g.classList.add('ghost');document.body.appendChild(g);drag.ghost=g;drag.el.style.opacity='.35';
+  }
+  if(drag.moved){
+    drag.ghost.style.left=(e.clientX-30)+'px';drag.ghost.style.top=(e.clientY-20)+'px';
+    document.querySelectorAll('.slot.over,.bank.over').forEach(x=>x.classList.remove('over'));
+    drag.ghost.style.display='none';const u=document.elementFromPoint(e.clientX,e.clientY);drag.ghost.style.display='';
+    const tgt=u&&(u.closest('.slot')||u.closest('#bank'));if(tgt)tgt.classList.add('over');
+  }
+});
+document.addEventListener('pointerup',e=>{
+  if(!drag)return;const d=drag;drag=null;
+  document.querySelectorAll('.slot.over,.bank.over').forEach(x=>x.classList.remove('over'));
+  if(d.moved){
+    d.ghost.remove();d.el.style.opacity='';
+    const u=document.elementFromPoint(e.clientX,e.clientY);
+    const s=u&&u.closest('#brew .slot'),b=u&&u.closest('#bank');
+    if(s)putSlot(d.t,+s.dataset.slot);else if(b)putBank(d.t);
+  }else{
+    // tap
+    const inSlot=d.el.closest('.slot');
+    if(inSlot){putBank(d.t)}
+    else{selected=selected===d.t?null:d.t;brewRender()}
+  }
+});
+document.addEventListener('pointercancel',()=>{if(drag){drag.ghost&&drag.ghost.remove();drag.el.style.opacity='';drag=null}});
+document.addEventListener('click',e=>{
+  const s=e.target.closest('#brew .slot');
+  if(s&&!e.target.closest('.chip')&&selected){putSlot(selected,+s.dataset.slot)}
+});
+$('#brewCheck').onclick=()=>{
+  if(placed.some(p=>!p)){$('#brewMsg').textContent='Place all eight terms first.';return}
+  let ok=0;status=placed.map((p,i)=>{const g=p===STEPS[i].t;if(g)ok++;return g?'ok':'bad'});
+  brewRender();
+  $('#brewMsg').textContent=ok===8?'Perfect! All 8 steps are in the right place.':ok+' / 8 correct — tap a red term to take it back and try again.';
+  if(ok===8)mark('brew');
+};
+$('#brewReset').onclick=brewInit;
+
+/* ======================= 2. crossword ======================= */
+const cells={},words=CW.words;let cur=null,dir='A',checked=false;
+(function cwBuild(){
+  words.forEach((w,wi)=>{for(let i=0;i<w.a.length;i++){
+    const r=w.r+(w.d==='D'?i:0),c=w.c+(w.d==='A'?i:0),k=r+','+c;
+    (cells[k]=cells[k]||{r,c,ch:w.a[i],val:'',words:{}}).words[w.d]=wi;
+  }});
+  const starts=[];words.forEach((w,wi)=>starts.push({wi,r:w.r,c:w.c}));
+  starts.sort((a,b)=>a.r-b.r||a.c-b.c);let n=0,last=null;
+  starts.forEach(s=>{const k=s.r+','+s.c;if(k!==last){n++;last=k;cells[k].num=n}words[s.wi].num=cells[k].num});
+  const g=$('#cwGrid');g.style.gridTemplateColumns=`repeat(${CW.cols},var(--cs))`;
+  for(let r=0;r<CW.rows;r++)for(let c=0;c<CW.cols;c++){
+    const k=r+','+c,d=document.createElement('div');
+    if(cells[k]){d.className='cw-cell';d.dataset.k=k;d.innerHTML=(cells[k].num?`<span class="num">${cells[k].num}</span>`:'')+'<span class="l"></span>';cells[k].el=d}
+    else d.className='cw-cell blank';
+    g.appendChild(d);
+  }
+  ['A','D'].forEach(dd=>{
+    $('#cl'+dd).innerHTML=words.map((w,i)=>({w,i})).filter(x=>x.w.d===dd).sort((a,b)=>a.w.num-b.w.num)
+      .map(x=>`<li data-w="${x.i}"><b>${x.w.num}</b>${x.w.q} (${x.w.a.length})</li>`).join('');
+  });
+})();
+function wordCells(wi){const w=words[wi];return [...w.a].map((_,i)=>cells[(w.r+(w.d==='D'?i:0))+','+(w.c+(w.d==='A'?i:0))])}
+function activeWord(){if(!cur)return null;const c=cells[cur];return c.words[dir]!==undefined?c.words[dir]:(dir=dir==='A'?'D':'A',c.words[dir])}
+function cwPaint(){
+  Object.values(cells).forEach(c=>{const e=c.el;e.classList.remove('word','cur','bad','good');e.querySelector('.l').textContent=c.val});
+  document.querySelectorAll('.cw-clues li').forEach(li=>{li.classList.remove('act');
+    li.classList.toggle('solved',wordCells(+li.dataset.w).every(c=>c.val===c.ch))});
+  if(!cur){return}
+  const wi=activeWord();wordCells(wi).forEach(c=>c.el.classList.add('word'));cells[cur].el.classList.add('cur');
+  document.querySelector(`.cw-clues li[data-w="${wi}"]`).classList.add('act');
+  $('#cwNow').innerHTML=`<b>${words[wi].num} ${words[wi].d==='A'?'Across':'Down'}:</b> ${words[wi].q} (${words[wi].a.length} letters)`;
+  if(checked)Object.values(cells).forEach(c=>{if(c.val)c.el.classList.add(c.val===c.ch?'good':'bad')});
+}
+function cwSelect(k){
+  if(cur===k){const c=cells[k];const o=dir==='A'?'D':'A';if(c.words[o]!==undefined)dir=o}
+  cur=k;cwPaint();const i=$('#cwIn');i.value='';i.focus({preventScroll:true});
+}
+function step(k,delta){
+  const wi=cells[k].words[dir];if(wi===undefined)return k;const cs=wordCells(wi);const i=cs.indexOf(cells[k]);
+  const n=cs[i+delta];return n?n.r+','+n.c:k;
+}
+$('#cwGrid').addEventListener('click',e=>{const c=e.target.closest('.cw-cell:not(.blank)');if(c)cwSelect(c.dataset.k)});
+document.querySelectorAll('.cw-clues').forEach(el=>el.addEventListener('click',e=>{
+  const li=e.target.closest('li');if(!li)return;const w=words[+li.dataset.w];dir=w.d;
+  const first=wordCells(+li.dataset.w).find(c=>c.val!==c.ch)||wordCells(+li.dataset.w)[0];cwSelect(first.r+','+first.c);
+}));
+$('#cwIn').addEventListener('input',e=>{
+  const v=(e.target.value||'').replace(/[^a-zA-Z]/g,'').slice(-1).toUpperCase();e.target.value='';
+  if(!v||!cur)return;cells[cur].val=v;checked=false;cur=step(cur,1);cwPaint();cwDone();
+});
+$('#cwIn').addEventListener('keydown',e=>{
+  if(!cur)return;const c=cells[cur];
+  if(e.key==='Backspace'){e.preventDefault();if(c.val){c.val=''}else{cur=step(cur,-1);cells[cur].val=''}checked=false;cwPaint()}
+  else if(e.key.startsWith('Arrow')){
+    e.preventDefault();const d={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0]}[e.key];
+    const k=(c.r+d[0])+','+(c.c+d[1]);if(cells[k]){dir=d[0]?'D':'A';cur=k;cwPaint()}
+  }else if(e.key==='Tab'){e.preventDefault();cwSelect(cur)}
+});
+function cwDone(){
+  if(Object.values(cells).every(c=>c.val===c.ch)){$('#cwMsg').textContent='Crossword complete. Well done!';mark('cw')}
+  else $('#cwMsg').textContent='';
+}
+$('#cwCheck').onclick=()=>{checked=true;cwPaint();const f=Object.values(cells).filter(c=>c.val);const bad=f.filter(c=>c.val!==c.ch).length;
+  $('#cwMsg').textContent=bad?bad+' wrong letter'+(bad>1?'s':'')+' in red.':(f.length===Object.keys(cells).length?'':'No mistakes so far.');cwDone()};
+$('#cwHint').onclick=()=>{if(!cur)return;wordCells(activeWord()).forEach(c=>c.val=c.ch);cwPaint();cwDone()};
+$('#cwClear').onclick=()=>{Object.values(cells).forEach(c=>c.val='');checked=false;$('#cwMsg').textContent='';cwPaint()};
+
+/* ======================= 3. beers quiz ======================= */
+let qi=0,score=0,order=[];
+function quizStart(){order=shuffle(QS);qi=0;score=0;quizShow()}
+function quizShow(){
+  const box=$('#quiz');
+  if(qi>=order.length){
+    mark('beers');
+    box.innerHTML=`<div class="qbox"><div class="qmeta"><span>Finished</span></div><div class="score">${score} / ${order.length}</div>
+      <p style="text-align:center">${score===order.length?'A perfect round. Cheers!':score>=order.length*.7?'Very good. Cheers!':'Have a look at the beer cards below and try again.'}</p>
+      <div class="actions"><button class="btn" id="qAgain">Play again</button></div></div>
+      <h2 style="margin-top:50px">The Burtonian range</h2>
+      <div class="beers">${BEERS.map(b=>`<div class="beer"><div class="dot" style="background:${b.c}"></div><h4>${b.n}</h4>
+        <b>Alcohol:</b> ${b.abv}%<br><b>Bitterness:</b> <span class="bitter">${'●'.repeat(b.bit)}${'○'.repeat(5-b.bit)}</span>${b.ibu!=null?'<br><b>IBU:</b> '+b.ibu:''}<br>
+        <b>Hops:</b> ${b.hops}<br><b>Colour:</b> ${b.col}<br><b>Aroma:</b> ${b.aroma}<br>${b.note}</div>`).join('')}</div>`;
+    $('#qAgain').onclick=quizStart;return;
+  }
+  const q=order[qi],opts=shuffle(q.o);
+  box.innerHTML=`<div class="qbox"><div class="qmeta"><span>Question ${qi+1} of ${order.length}</span><span>Score ${score}</span></div>
+    <div class="bar"><i style="width:${qi/order.length*100}%"></i></div><p class="qtext">${q.q}</p>
+    <div class="opts">${opts.map(o=>`<button class="opt" type="button">${o}</button>`).join('')}</div>
+    <p class="explain" id="exp"></p><div class="actions"><button class="btn" id="qNext" style="display:none">${qi+1<order.length?'Next question':'See my score'}</button></div></div>`;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const good=b.textContent===q.a;if(good)score++;
+    box.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('right')});
+    if(!good)b.classList.add('wrong');
+    $('#exp').innerHTML=(good?'<b>Correct!</b> ':'<b>Not quite.</b> ')+q.e;$('#qNext').style.display='';
+    $('#qNext').onclick=()=>{qi++;quizShow()};
+  });
+}
+brewInit();quizStart();
+</script>
+</body>
+</html>
